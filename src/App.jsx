@@ -169,10 +169,7 @@ function App() {
           console.error("Error al cargar la imagen. Verifique las rutas relativas.");
           setImageUrl("https://placehold.co/2920x1080/FF0000/ffffff?text=ERROR+AL+CARGAR+IMAGEN");
         }}
-      />
-      <div style={{ position: 'absolute', bottom: '10px', right: '10px', color: 'rgba(255, 255, 255, 0.7)', fontSize: '1.2em', zIndex: 100 }}>
-        {isRotating ? `Rotando (${currentImageSet.join(', ')})` : 'Modo Estático'}
-      </div>
+      />     
     </div>
   );
 }
