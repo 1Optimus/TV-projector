@@ -1,117 +1,150 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 
-// ⚙️ CONFIGURACIÓN Y CONSTANTES
-// Las rutas relativas aseguran que solo se carguen una vez desde el bundle de Vite.
-const ALL_IMAGE_URLS = { 
-  '1': "../f1.jpg", 
-  '2': "../f2.jpg",
-  '3': "../f3.jpg",
-  '4': "../f4.jpg",
+// ⚙️ CONFIGURACIÓN DE IMÁGENES (ESTRUCTURA DE 3 NIVELES)
+// Estructura: Opción (1-3) -> Set/Día -> Array de Imágenes
+const IMAGE_SETS = {
+   "1": {
+    "Lunes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Martes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Miercoles": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Jueves": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Viernes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Sabado": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+  },
+  "2": {
+    "Lunes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Martes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Miercoles": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Jueves": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Viernes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Sabado": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+  },
+  "3": {
+    "Lunes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Martes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Miercoles": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Jueves": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Viernes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Sabado": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+  },
 };
 
-const MORNING_KEYS = ['1', '2'];    // Set 1: Rotación con tecla '5'
-const DAY_NIGHT_KEYS = ['3', '4']; // Set 2: Rotación con tecla '6'
+const ROTATION_INTERVAL_MS = 10000; // Rotación cada 10 segundos
+const DEFAULT_OPTION = "1";
 
-const ROTATION_INTERVAL_MS = 10000;  // Rotación cada 10 segundos
+// --- NUEVA UTILIDAD: Obtener el día actual del sistema ---
+const getSystemDayKey = () => {
+  const days = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+  return days[new Date().getDay()];
+};
+
+// Función auxiliar para obtener el primer "Día" (Set) de una opción (Fallback)
+const getFirstSetKey = (option) => Object.keys(IMAGE_SETS[option])[0];
 
 function App() {
 
-  // --- ESTADOS DE ROTACIÓN E IMAGEN ---
-  const [isRotating, setIsRotating] = useState(false);
-  const [currentImageSet, setCurrentImageSet] = useState(DAY_NIGHT_KEYS); 
-  const [currentKeyIndex, setCurrentKeyIndex] = useState(0); 
-  const [imageUrl, setImageUrl] = useState(ALL_IMAGE_URLS[DAY_NIGHT_KEYS[0]]);
+  // --- ESTADOS ---
+  const [selectedOption, setSelectedOption] = useState(DEFAULT_OPTION); 
+  
+  // ➡️ INICIALIZACIÓN AUTOMÁTICA DEL DÍA
+  const [currentSetKey, setCurrentSetKey] = useState(() => {
+    const today = getSystemDayKey();
+    // Si hoy existe en la configuración, úsalo. Si es Domingo y no existe, usa el primero (Lunes).
+    if (IMAGE_SETS[DEFAULT_OPTION][today]) {
+        return today;
+    }
+    return getFirstSetKey(DEFAULT_OPTION);
+  });
+  
+  const [isRotating, setIsRotating] = useState(true); 
 
+  // Obtener el array de imágenes actual basado en la Opción y el Set (Día)
+  const currentImageArray = IMAGE_SETS[selectedOption]?.[currentSetKey] || [];
+  
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); 
+  const [imageUrl, setImageUrl] = useState(currentImageArray[0]);
+  
+  // Estado para forzar la transición (fade-in)
+  const [imageKey, setImageKey] = useState(Date.now()); 
 
-  // --- UTILIDAD: Maneja la rotación manual (adelante/atrás) ---
+  // --- UTILIDAD: Rotación Manual ---
   const handleManualRotation = (direction) => {
-      // Usamos la forma funcional de setState para garantizar la consistencia
-      setCurrentKeyIndex(prevIndex => {
-          const totalKeys = currentImageSet.length;
-          let newIndex;
-          
-          // 1. Encontrar el índice de la imagen actualmente mostrada (incluso si la rotación estaba desactivada)
-          const currentKey = Object.keys(ALL_IMAGE_URLS).find(key => ALL_IMAGE_URLS[key] === imageUrl);
-          let currentIndex = currentImageSet.indexOf(currentKey);
+      setIsRotating(false); // Pausar rotación al usar flechas
+      
+      setCurrentImageIndex(prevIndex => {
+          const totalImages = currentImageArray.length;
+          if (totalImages <= 1) return prevIndex;
 
-          // Si la imagen actual no está en el set, o si el set tiene un solo elemento, salir.
-          if (currentIndex === -1 || totalKeys < 2) {
-            currentIndex = prevIndex; // Usar el índice anterior
-          }
-          
+          let newIndex = prevIndex;
           if (direction === 'next') {
-              // Avanzar: usa módulo para volver a 0
-              newIndex = (currentIndex + 1) % totalKeys;
+              newIndex = (prevIndex + 1) % totalImages;
           } else if (direction === 'prev') {
-              // Retroceder: maneja el -1 sumando totalKeys antes del módulo
-              newIndex = (currentIndex - 1 + totalKeys) % totalKeys;
-          } else {
-              return prevIndex;
+              newIndex = (prevIndex - 1 + totalImages) % totalImages;
           }
 
-          // 2. Actualizar la URL de la imagen con el nuevo índice
-          const nextKey = currentImageSet[newIndex];
-          setImageUrl(ALL_IMAGE_URLS[nextKey]);
-
-          // 3. Retornar el nuevo índice
+          setImageUrl(currentImageArray[newIndex]);
+          setImageKey(Date.now()); // Transición
           return newIndex;
       });
   };
 
-  // ➡️ --- EFECTO 1: PRECARGA DE IMÁGENES (Se ejecuta solo una vez) ---
+  // --- EFECTO 1: PRECARGA DE TODAS LAS IMÁGENES ---
   useEffect(() => {
-    // 1. Obtener todas las URLs de imagen
-    const urlsToPreload = Object.values(ALL_IMAGE_URLS);
+    // Aplanamos la estructura de 3 niveles para obtener todas las URLs
+    const allUrls = Object.values(IMAGE_SETS).flatMap(optionSets => 
+        Object.values(optionSets).flat()
+    );
 
-    urlsToPreload.forEach(url => {
-      // 2. Crear un nuevo elemento Image en JavaScript
+    allUrls.forEach(url => {
       const img = new Image();
-      // 3. Asignar la URL para forzar al navegador a descargarla
       img.src = url;
-      // Opcional: manejar errores de precarga si es necesario
-      img.onerror = () => console.error(`Failed to preload image: ${url}`);
+      img.onerror = () => console.error(`Error precargando: ${url}`);
     });
     
-    console.log(`Preloaded ${urlsToPreload.length} images into browser cache.`);
-    
-    // El array vacío asegura que esto solo se ejecute al montar
+    console.log(`Precargando ${allUrls.length} imágenes en caché.`);
   }, []);
 
-
-  // --- EFECTO 2: Manejo de Input de Teclado (Remoto) ---
+  // --- EFECTO 2: CONTROL DE TECLADO ---
   useEffect(() => {
     const handleKeyPress = (event) => {
         const key = event.key;
 
-        // 1. Teclas 1, 2, 3, 4 (Modo Imagen Única)
-        if (['1', '2', '3', '4'].includes(key)) {
-            setIsRotating(false); // Detener rotación automática
+        // 1. Selección de Opción Principal (Teclas 1, 2, 3)
+        if (['1', '2', '3'].includes(key)) {
+            if (!IMAGE_SETS[key]) return; 
+
+            setSelectedOption(key);
             
-            const newSet = (key === '1' || key === '2') ? MORNING_KEYS : DAY_NIGHT_KEYS;
-            setCurrentImageSet(newSet);
+            // ➡️ Lógica inteligente: Intentar mantener el día actual del sistema
+            const today = getSystemDayKey();
+            const nextSetKey = IMAGE_SETS[key][today] ? today : getFirstSetKey(key);
+
+            setCurrentSetKey(nextSetKey);
+            setCurrentImageIndex(0);
+            setIsRotating(true);
             
-            setImageUrl(ALL_IMAGE_URLS[key]);
-            console.log(`Mostrando Imagen ${key}`);
+            console.log(`Opción ${key} seleccionada. Iniciando en ${nextSetKey}.`);
             return;
         }
 
-        // 2. Teclas 5, 6 (Modo Rotación de Set)
-        if (key === '5' || key === '6') {
-            const newSet = (key === '5') ? MORNING_KEYS : DAY_NIGHT_KEYS;
-            
-            if (isRotating && JSON.stringify(currentImageSet) === JSON.stringify(newSet)) return;
+        // 2. Selección de Set/Día (Teclas 4, 5, 6, 7, 8, 9)
+        // Mapeo: 4->Lunes, 5->Martes, 6->Miercoles, 7->Jueves, 8->Viernes, 9->Sabado
+        const dayKeys = Object.keys(IMAGE_SETS[selectedOption]);
+        const keyIndex = parseInt(key) - 4; 
 
-            setCurrentImageSet(newSet);
-            setIsRotating(true); // Iniciar rotación automática
+        if (keyIndex >= 0 && keyIndex < dayKeys.length) {
+            const newSetKey = dayKeys[keyIndex];
             
-            setCurrentKeyIndex(0); 
-            setImageUrl(ALL_IMAGE_URLS[newSet[0]]);
-            console.log(`Iniciando rotación del Set ${key === '5' ? 'Mañana' : 'Día/Noche'}`);
+            setCurrentSetKey(newSetKey);
+            setCurrentImageIndex(0); 
+            setIsRotating(true); 
+            
+            console.log(`Cambiando manualmente a día: ${newSetKey}`);
             return;
         }
 
-        // 3. Teclas de Flecha (Control Manual)
+        // 3. Control Manual de Imágenes (Flechas)
         switch (key) {
             case 'ArrowRight':
             case 'Right':
@@ -127,257 +160,58 @@ function App() {
     };
 
     window.addEventListener('keydown', handleKeyPress);
-    return () => {
-        window.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [currentImageSet, imageUrl]); 
-  
-  // --- EFECTO 3: Rotación Automática (Solo si isRotating es true) ---
-  useEffect(() => {
-    let rotationIntervalId;
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [selectedOption, currentSetKey, currentImageArray]); 
 
-    if (isRotating) {
-        rotationIntervalId = setInterval(() => {
-            setCurrentKeyIndex(prevIndex => {
-                const totalKeys = currentImageSet.length;
-                const nextIndex = (prevIndex + 1) % totalKeys;
-                const nextKey = currentImageSet[nextIndex];
-                
-                // Cuando se establece el nuevo src, el navegador lo buscará en el caché
-                setImageUrl(ALL_IMAGE_URLS[nextKey]); 
-                
+  // --- EFECTO 3: SINCRONIZACIÓN Y ROTACIÓN AUTOMÁTICA ---
+  useEffect(() => {
+    // 1. Actualizar la imagen inmediatamente cuando cambie la Opción o el Set
+    if (currentImageArray.length > 0) {
+        setImageUrl(currentImageArray[currentImageIndex]);
+        setImageKey(Date.now()); // Transición
+    }
+
+    // 2. Configurar el intervalo de rotación
+    let intervalId;
+    if (isRotating && currentImageArray.length > 1) {
+        intervalId = setInterval(() => {
+            setCurrentImageIndex(prevIndex => {
+                const nextIndex = (prevIndex + 1) % currentImageArray.length;
+                setImageUrl(currentImageArray[nextIndex]);
+                setImageKey(Date.now()); // Transición
                 return nextIndex;
             });
         }, ROTATION_INTERVAL_MS);
     }
-    
-    return () => {
-        if (rotationIntervalId) {
-            clearInterval(rotationIntervalId);
-        }
-    };
-  }, [isRotating, currentImageSet]); 
+
+    return () => clearInterval(intervalId);
+  }, [isRotating, selectedOption, currentSetKey, currentImageArray, currentImageIndex]); 
 
   return (
     <div className="bg-black min-h-screen w-screen p-0 m-0 overflow-hidden flex items-center justify-center">
       
       <img
+        key={imageKey} 
         src={imageUrl}
-        alt="Imagen dinámica en Pantalla Completa"      
-        className="max-w-full max-h-full object-cover" 
+        alt={`Opción ${selectedOption} - ${currentSetKey}`}
+        className="max-w-full max-h-full object-cover fade-in" 
         onError={() => {          
-          console.error("Error al cargar la imagen. Verifique las rutas relativas.");
-          setImageUrl("https://placehold.co/2920x1080/FF0000/ffffff?text=ERROR+AL+CARGAR+IMAGEN");
+          console.error(`Error cargando imagen: ${imageUrl}`);
+          setImageUrl(`https://placehold.co/1920x1080/FF0000/ffffff?text=Error+${selectedOption}+${currentSetKey}`);
         }}
-      />     
+      />
+      
+      {/* Panel de Información (Debug) */}
+      <div style={{ position: 'absolute', bottom: '20px', right: '20px', textAlign: 'right', color: 'rgba(255,255,255,0.8)', fontFamily: 'sans-serif', zIndex: 100 }}>
+        <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>Opción {selectedOption}</div>
+        <div style={{ fontSize: '1.2em' }}>{currentSetKey}</div>
+        <div style={{ fontSize: '0.9em' }}>
+            {isRotating ? '⟳ Rotando' : '⏸ Pausado'} ({currentImageIndex + 1}/{currentImageArray.length})
+        </div>
+      </div>
     </div>
   );
 }
 
 export default App;
 
-/* import { useState, useEffect } from 'react';
-import './App.css';
-
-// ⚙️ CONFIGURACIÓN Y CONSTANTES
-const ALL_IMAGE_URLS = { 
-  '1': "../f1.jpg", 
-  '2': "../f2.jpg",
-  '3': "../f3.jpg",
-  '4': "../f4.jpg",
-};
-
-const MORNING_KEYS = ['1', '2'];    // 3:00 AM a 10:59 AM
-const DAY_NIGHT_KEYS = ['3', '4']; // 11:00 AM a 2:59 AM
-
-const ROTATION_INTERVAL_MS = 10000;  // Rotación cada 10 segundos
-// ➡️ CAMBIO AQUÍ: Cada 5 minutos (300,000 ms)
-const TIME_UPDATE_INTERVAL_MS = 300000; 
-const TIME_API_URL = 'https://worldtimeapi.org/api/timezone/America/Chicago';
-
-// Configuración de reintento para la conexión
-const MAX_RETRIES = 5;
-
-function App() {
-
-  const [currentTime, setCurrentTime] = useState('Cargando hora...');
-  const [showClock, setShowClock] = useState(true);
-  const [currentImageSet, setCurrentImageSet] = useState(DAY_NIGHT_KEYS); 
-  const [currentKeyIndex, setCurrentKeyIndex] = useState(0); 
-  const [imageUrl, setImageUrl] = useState(ALL_IMAGE_URLS[DAY_NIGHT_KEYS[0]]);
-
-  // --- UTILIDAD: Determina qué set de imágenes usar ---
-  const getCurrentKeys = (hour) => {
-    // Periodo de la mañana: 3 (3:00 AM) a 10 (10:59 AM)
-    const isMorningPeriod = hour >= 3 && hour <= 10;
-    return isMorningPeriod ? MORNING_KEYS : DAY_NIGHT_KEYS;
-  };
-  
-  // --- UTILIDAD: Maneja la rotación manual (adelante/atrás) ---
-  const handleManualRotation = (direction) => {
-      // Usamos la forma funcional de setState para garantizar que se usa el último índice
-      setCurrentKeyIndex(prevIndex => {
-          const totalKeys = currentImageSet.length;
-          let newIndex;
-          
-          if (direction === 'next') {
-              // Avanzar, usa módulo para volver a 0
-              newIndex = (prevIndex + 1) % totalKeys;
-          } else if (direction === 'prev') {
-              // Retroceder, suma totalKeys antes de módulo para manejar el -1
-              newIndex = (prevIndex - 1 + totalKeys) % totalKeys;
-          } else {
-              return prevIndex; // No hacer nada
-          }
-
-          // Actualizar la URL de la imagen con el nuevo índice
-          const nextKey = currentImageSet[newIndex];
-          setImageUrl(ALL_IMAGE_URLS[nextKey]);
-
-          return newIndex;
-      });
-  };
-
-  // --- EFECTO 1: Control de Hora y Set de Imágenes (Se ejecuta cada cierto tiempo) ---
-  useEffect(() => {
-    
-    // Función de reintento con contador de intentos
-    const fetchTimeAndSetImageSet = async (retryCount = 0) => {
-      try {
-        const response = await fetch(TIME_API_URL);
-
-        if (!response.ok) {
-           throw new Error(`Error HTTP: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // --- Cálculo y Lógica del Tiempo ---
-        const date = new Date(data.datetime);
-        const hour = date.getHours(); 
-        
-        const newKeys = getCurrentKeys(hour);
-        const isMorningPeriod = newKeys === MORNING_KEYS;
-
-        // 1. Configurar la visibilidad del reloj
-        setShowClock(!isMorningPeriod); 
-        
-        // 2. Determinar si el set de imágenes debe cambiar
-        setCurrentImageSet(prevKeys => {
-            if (JSON.stringify(prevKeys) !== JSON.stringify(newKeys)) {
-                setCurrentKeyIndex(0); 
-                setImageUrl(ALL_IMAGE_URLS[newKeys[0]]);
-                return newKeys;
-            }
-            return prevKeys; 
-        });
-
-        // 3. Configurar la hora para el display
-        const timeString = date.toLocaleTimeString('es-MX', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false 
-        });
-        setCurrentTime(timeString);
-        // --- Fin de Cálculo y Lógica del Tiempo ---
-
-      } catch (error) {
-        console.error("Fallo al obtener la hora:", error);
-        
-        // ➡️ LÓGICA DE REINTENTO
-        if (retryCount < MAX_RETRIES) {
-            console.log(`Reintentando conexión... Intento ${retryCount + 1}/${MAX_RETRIES}`);
-            setTimeout(() => fetchTimeAndSetImageSet(retryCount + 1), 2000); 
-        } else {
-            setCurrentTime('Error de hora: Conexión inestable');
-        }
-      }
-    };
-
-    fetchTimeAndSetImageSet(); // Ejecutar inmediatamente al montar
-    
-    // Intervalo para revaluar el tiempo
-    const timeIntervalId = setInterval(fetchTimeAndSetImageSet, TIME_UPDATE_INTERVAL_MS); 
-
-    return () => clearInterval(timeIntervalId);
-  }, []); 
-
-  // --- EFECTO 2: Rotación Automática de Imágenes ---
-  useEffect(() => {
-    const ALL_KEYS = Object.keys(currentImageSet); 
-    
-    const rotateImage = () => {
-      setCurrentKeyIndex(prevIndex => {
-        const nextIndex = (prevIndex + 1) % ALL_KEYS.length;
-        const nextKey = currentImageSet[nextIndex];
-        
-        setImageUrl(ALL_IMAGE_URLS[nextKey]);
-        
-        return nextIndex;
-      });
-    };
-
-    const rotationIntervalId = setInterval(rotateImage, ROTATION_INTERVAL_MS);
-
-    return () => clearInterval(rotationIntervalId);
-    
-  }, [currentImageSet]); 
-  
-  // ➡️ --- EFECTO 3: Manejo de Input de Teclado (Remoto) ---
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-        // La propiedad 'key' es el estándar moderno
-        switch (event.key) {
-            case 'ArrowRight':
-            case 'Right': // Algunas implementaciones antiguas usan solo 'Right'
-                handleManualRotation('next');
-                break;
-            case 'ArrowLeft':
-            case 'Left': // Algunas implementaciones antiguas usan solo 'Left'
-                handleManualRotation('prev');
-                break;
-            case 'Enter':
-            case 'NumpadEnter':
-            case 'OK': // Tecla Aceptar
-                // Aquí podrías añadir lógica si es necesario (ej: pausar)
-                console.log("Acción Aceptar/Enter detectada.");
-                break;
-            default:
-                // Ignorar otras teclas
-                break;
-        }
-    };
-
-    // Escuchar eventos de teclado en toda la ventana
-    window.addEventListener('keydown', handleKeyPress);
-
-    // Limpieza: importante remover el listener al desmontar el componente
-    return () => {
-        window.removeEventListener('keydown', handleKeyPress);
-    };
-    // Dependemos de currentImageSet para saber el límite de la rotación
-  }, [currentImageSet]); 
-
-  return (
-    <div className="bg-black min-h-screen w-screen p-0 m-0 overflow-hidden flex items-center justify-center">
-      
-      {showClock && (
-        <div style={{ position: 'absolute', top: '10px', left: '10px', color: 'white', fontSize: '2em', zIndex: 100, fontWeight: 'bold' }}>
-          {currentTime}
-        </div>
-      )}
-      
-      <img
-        src={imageUrl}
-        alt="Imagen dinámica en Pantalla Completa"      
-        className="max-w-full max-h-full object-cover" 
-        onError={() => {          
-          console.error("Error al cargar la imagen.");
-          setImageUrl("https://placehold.co/2920x1080/FF0000/ffffff?text=ERROR+AL+CARGAR+IMAGEN");
-        }}
-      />
-    </div>
-  );
-}
-
-export default App; */
