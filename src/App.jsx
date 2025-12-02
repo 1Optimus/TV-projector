@@ -5,28 +5,28 @@ import './App.css';
 // Estructura: Opción (1-3) -> Set/Día -> Array de Imágenes
 const IMAGE_SETS = {
    "1": {
-    "Lunes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Martes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Miercoles": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Jueves": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Viernes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Sabado": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Lunes": ["../ml.jpg"],
+    "Martes": ["../mm.jpg"],
+    "Miercoles": ["../mmi.jpg"],
+    "Jueves": ["../mj.jpg"],
+    "Viernes": ["../mv.jpg"],
+    "Sabado": ["../ms.jpg"],
   },
   "2": {
-    "Lunes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Martes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Miercoles": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Jueves": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Viernes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Sabado": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Lunes": ["../f4.jpg", "../f5.jpg", "../f6.jpg","../f7.jpg","../f8.jpg"],
+    "Martes": ["../f4.jpg", "../f5.jpg", "../fvm.jpg","../f7.jpg","../f8.jpg"],
+    "Miercoles": ["../f4.jpg", "../f5.jpg", "../fvmi.jpg","../f7.jpg","../f8.jpg"],
+    "Jueves": ["../f4.jpg", "../f5.jpg", "../fvj.jpg","../f7.jpg","../f8.jpg"],
+    "Viernes": ["../f4.jpg", "../f5.jpg", "../fvv.jpg","../f7.jpg","../f8.jpg"],
+    "Sabado": ["../f4.jpg", "../f5.jpg", "../fvs.jpg","../f7.jpg","../f8.jpg"],
   },
   "3": {
-    "Lunes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Martes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Miercoles": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Jueves": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Viernes": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
-    "Sabado": ["../f1.jpg", "../f2.jpg", "../f3.jpg"],
+    "Lunes": ["../f4.jpg", "../f5.jpg", "../f6.jpg","../f7.jpg","../f8.jpg"],
+    "Martes": ["../f4.jpg", "../f5.jpg", "../fvm.jpg","../f7.jpg","../f8.jpg"],
+    "Miercoles": ["../f4.jpg", "../f5.jpg", "../fvmi.jpg","../f7.jpg","../f8.jpg"],
+    "Jueves": ["../f4.jpg", "../f5.jpg", "../fvj.jpg","../f7.jpg","../f8.jpg"],
+    "Viernes": ["../f4.jpg", "../f5.jpg", "../fvv.jpg","../f7.jpg","../f8.jpg"],
+    "Sabado": ["../f4.jpg", "../f5.jpg", "../fvs.jpg","../f7.jpg","../f8.jpg"],
   },
 };
 
@@ -201,7 +201,7 @@ function App() {
         }}
       />
       
-      {/* Panel de Información (Debug) */}
+    
       <div style={{ position: 'absolute', bottom: '20px', right: '20px', textAlign: 'right', color: 'rgba(255,255,255,0.8)', fontFamily: 'sans-serif', zIndex: 100 }}>
         <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>Opción {selectedOption}</div>
         <div style={{ fontSize: '1.2em' }}>{currentSetKey}</div>
@@ -209,6 +209,7 @@ function App() {
             {isRotating ? '⟳ Rotando' : '⏸ Pausado'} ({currentImageIndex + 1}/{currentImageArray.length})
         </div>
       </div>
+      
     </div>
   );
 }
