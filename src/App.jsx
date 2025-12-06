@@ -5,12 +5,12 @@ import './App.css';
 // Estructura: Opción (1-3) -> Set/Día -> Array de Imágenes
 const IMAGE_SETS = {
    "1": {
-    "Lunes": ["../ml.jpg"],
-    "Martes": ["../mm.jpg"],
-    "Miercoles": ["../mmi.jpg"],
-    "Jueves": ["../mj.jpg"],
-    "Viernes": ["../mv.jpg"],
-    "Sabado": ["../ms.jpg"],
+    "Lunes": ["../lm.jpg"],
+    "Martes": ["../mam.jpg"],
+    "Miercoles": ["../mim.jpg"],
+    "Jueves": ["../jm.jpg"],
+    "Viernes": ["../vm.jpg"],
+    "Sabado": ["../sm.jpg"],
   },
   "2": {
     "Lunes": ["../f9.jpg", "../f5.jpg", "../f6.jpg","../f7.jpg","../f8.jpg"],
