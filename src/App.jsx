@@ -5,32 +5,32 @@ import './App.css';
 // Estructura: Opción (1-3) -> Set/Día -> Array de Imágenes
 const IMAGE_SETS = {
    "1": {
-    "Lunes": ["../lm.jpg"],
-    "Martes": ["../mam.jpg"],
-    "Miercoles": ["../mim.jpg"],
-    "Jueves": ["../jm.jpg"],
-    "Viernes": ["../vm.jpg"],
-    "Sabado": ["../sm.jpg"],
+    "Lunes": ["../v1.jpg", "../v2.jpg", "../v3.jpg"],
+    "Martes": ["../v1.jpg", "../v2.jpg", "../v3.jpg"],
+    "Miercoles": ["../v1.jpg", "../v2.jpg", "../v3.jpg"],
+    "Jueves": ["../v1.jpg", "../v2.jpg", "../v3.jpg"],
+    "Viernes": ["../v1.jpg", "../v2.jpg", "../v3.jpg"],
+    "Sabado": ["../v1.jpg", "../v2.jpg", "../v3.jpg"],
   },
   "2": {
-    "Lunes": ["../f9.jpg", "../f5.jpg", "../f6.jpg","../f7.jpg","../f8.jpg"],
-    "Martes": ["../f9.jpg", "../f5.jpg", "../fvm.jpg","../f7.jpg","../f8.jpg"],
-    "Miercoles": ["../f9.jpg", "../f5.jpg", "../fvmi.jpg","../f7.jpg","../f8.jpg"],
-    "Jueves": ["../f9.jpg", "../f5.jpg", "../fvj.jpg","../f7.jpg","../f8.jpg"],
-    "Viernes": ["../f9.jpg", "../f5.jpg", "../fvv.jpg","../f7.jpg","../f8.jpg"],
-    "Sabado": ["../f9.jpg", "../f5.jpg", "../fvs.jpg","../f7.jpg","../f8.jpg"],
+    "Lunes": ["../v4.jpg", "../v5.jpg", "../v6.jpg"],
+    "Martes": ["../v4.jpg", "../v5.jpg", "../v6.jpg"],
+    "Miercoles": ["../v4.jpg", "../v5.jpg", "../v6.jpg"],
+    "Jueves": ["../v4.jpg", "../v5.jpg", "../v6.jpg"],
+    "Viernes": ["../v4.jpg", "../v5.jpg", "../v6.jpg"],
+    "Sabado": ["../v4.jpg", "../v5.jpg", "../v6.jpg"],
   },
   "3": {
-    "Lunes": ["../f9.jpg", "../f5.jpg", "../f6.jpg","../f7.jpg","../f8.jpg"],
-    "Martes": ["../f9.jpg", "../f5.jpg", "../fvm.jpg","../f7.jpg","../f8.jpg"],
-    "Miercoles": ["../f9.jpg", "../f5.jpg", "../fvmi.jpg","../f7.jpg","../f8.jpg"],
-    "Jueves": ["../f9.jpg", "../f5.jpg", "../fvj.jpg","../f7.jpg","../f8.jpg"],
-    "Viernes": ["../f9.jpg", "../f5.jpg", "../fvv.jpg","../f7.jpg","../f8.jpg"],
-    "Sabado": ["../f9.jpg", "../f5.jpg", "../fvs.jpg","../f7.jpg","../f8.jpg"],
+    "Lunes": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
+    "Martes": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
+    "Miercoles": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
+    "Jueves": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
+    "Viernes": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
+    "Sabado": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
   },
 };
 
-const ROTATION_INTERVAL_MS = 10000; // Rotación cada 10 segundos
+const ROTATION_INTERVAL_MS = 7000; // Rotación cada 5 segundos
 const DEFAULT_OPTION = "1";
 
 // --- NUEVA UTILIDAD: Obtener el día actual del sistema ---
@@ -201,15 +201,6 @@ function App() {
         }}
       />
       
-      {/* Panel de Información (Debug) 
-      <div style={{ position: 'absolute', bottom: '20px', right: '20px', textAlign: 'right', color: 'rgba(255,255,255,0.8)', fontFamily: 'sans-serif', zIndex: 100 }}>
-        <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>Opción {selectedOption}</div>
-        <div style={{ fontSize: '1.2em' }}>{currentSetKey}</div>
-        <div style={{ fontSize: '0.9em' }}>
-            {isRotating ? '⟳ Rotando' : '⏸ Pausado'} ({currentImageIndex + 1}/{currentImageArray.length})
-        </div>
-      </div>
-      */}
     </div>
   );
 }
