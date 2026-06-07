@@ -21,12 +21,12 @@ const IMAGE_SETS = {
     "Sabado": ["../v4.jpg", "../v5.jpg", "../v6.jpg"],
   },
   "3": {
-    "Lunes": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
-    "Martes": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
-    "Miercoles": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
-    "Jueves": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
-    "Viernes": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
-    "Sabado": ["../v7.jpg", "../v8.jpg", "../v2.jpg"],
+    "Lunes": ["../v7.jpg", "../v2.jpg"],
+    "Martes": ["../v7.jpg", "../v2.jpg"],
+    "Miercoles": ["../v7.jpg", "../v2.jpg"],
+    "Jueves": ["../v7.jpg", "../v2.jpg"],
+    "Viernes": ["../v7.jpg", "../v2.jpg"],
+    "Sabado": ["../v7.jpg", "../v2.jpg"],
   },
 };
 
