@@ -63,30 +63,45 @@ function App() {
   const currentImageArray = IMAGE_SETS[selectedOption]?.[currentSetKey] || [];
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0); 
-  const [imageUrl, setImageUrl] = useState(currentImageArray[0]);
   
-  // Estado para forzar la transición (fade-in)
-  const [imageKey, setImageKey] = useState(Date.now()); 
+  // Estados para la transición tipo slide
+  const [imageUrl, setImageUrl] = useState(currentImageArray[0]);
+  const [prevImageUrl, setPrevImageUrl] = useState(null);
+  const [slideDirection, setSlideDirection] = useState('next');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [imageKey, setImageKey] = useState(Date.now());
+
+  // --- UTILIDAD: Función central para cambiar de imagen ---
+  const changeImage = (newIndex, direction, newImageArray = currentImageArray) => {
+      setPrevImageUrl(imageUrl);
+      setCurrentImageIndex(newIndex);
+      setImageUrl(newImageArray[newIndex]);
+      setSlideDirection(direction);
+      setIsTransitioning(true);
+      setImageKey(Date.now());
+      
+      // Limpiar el estado de transición después de que termine la animación
+      setTimeout(() => {
+          setIsTransitioning(false);
+          setPrevImageUrl(null);
+      }, 800); // 800ms debe coincidir con la animación CSS
+  };
 
   // --- UTILIDAD: Rotación Manual ---
   const handleManualRotation = (direction) => {
       setIsRotating(false); // Pausar rotación al usar flechas
       
-      setCurrentImageIndex(prevIndex => {
-          const totalImages = currentImageArray.length;
-          if (totalImages <= 1) return prevIndex;
+      const totalImages = currentImageArray.length;
+      if (totalImages <= 1) return;
 
-          let newIndex = prevIndex;
-          if (direction === 'next') {
-              newIndex = (prevIndex + 1) % totalImages;
-          } else if (direction === 'prev') {
-              newIndex = (prevIndex - 1 + totalImages) % totalImages;
-          }
+      let newIndex = currentImageIndex;
+      if (direction === 'next') {
+          newIndex = (currentImageIndex + 1) % totalImages;
+      } else if (direction === 'prev') {
+          newIndex = (currentImageIndex - 1 + totalImages) % totalImages;
+      }
 
-          setImageUrl(currentImageArray[newIndex]);
-          setImageKey(Date.now()); // Transición
-          return newIndex;
-      });
+      changeImage(newIndex, direction);
   };
 
   // --- EFECTO 1: PRECARGA DE TODAS LAS IMÁGENES ---
@@ -116,30 +131,31 @@ function App() {
 
             setSelectedOption(key);
             
-            // ➡️ Lógica inteligente: Intentar mantener el día actual del sistema
+            // Lógica inteligente: Intentar mantener el día actual del sistema
             const today = getSystemDayKey();
             const nextSetKey = IMAGE_SETS[key][today] ? today : getFirstSetKey(key);
+            const newArray = IMAGE_SETS[key][nextSetKey];
 
             setCurrentSetKey(nextSetKey);
-            setCurrentImageIndex(0);
             setIsRotating(true);
             
+            changeImage(0, 'next', newArray);
             console.log(`Opción ${key} seleccionada. Iniciando en ${nextSetKey}.`);
             return;
         }
 
         // 2. Selección de Set/Día (Teclas 4, 5, 6, 7, 8, 9)
-        // Mapeo: 4->Lunes, 5->Martes, 6->Miercoles, 7->Jueves, 8->Viernes, 9->Sabado
         const dayKeys = Object.keys(IMAGE_SETS[selectedOption]);
         const keyIndex = parseInt(key) - 4; 
 
         if (keyIndex >= 0 && keyIndex < dayKeys.length) {
             const newSetKey = dayKeys[keyIndex];
+            const newArray = IMAGE_SETS[selectedOption][newSetKey];
             
             setCurrentSetKey(newSetKey);
-            setCurrentImageIndex(0); 
             setIsRotating(true); 
             
+            changeImage(0, 'next', newArray);
             console.log(`Cambiando manualmente a día: ${newSetKey}`);
             return;
         }
@@ -161,40 +177,49 @@ function App() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [selectedOption, currentSetKey, currentImageArray]); 
+  }, [selectedOption, currentSetKey, currentImageArray, currentImageIndex, imageUrl]); 
 
-  // --- EFECTO 3: SINCRONIZACIÓN Y ROTACIÓN AUTOMÁTICA ---
+  // --- EFECTO 3: ROTACIÓN AUTOMÁTICA ---
   useEffect(() => {
-    // 1. Actualizar la imagen inmediatamente cuando cambie la Opción o el Set
-    if (currentImageArray.length > 0) {
-        setImageUrl(currentImageArray[currentImageIndex]);
-        setImageKey(Date.now()); // Transición
-    }
-
-    // 2. Configurar el intervalo de rotación
     let intervalId;
     if (isRotating && currentImageArray.length > 1) {
         intervalId = setInterval(() => {
-            setCurrentImageIndex(prevIndex => {
-                const nextIndex = (prevIndex + 1) % currentImageArray.length;
-                setImageUrl(currentImageArray[nextIndex]);
-                setImageKey(Date.now()); // Transición
-                return nextIndex;
-            });
+            const nextIndex = (currentImageIndex + 1) % currentImageArray.length;
+            changeImage(nextIndex, 'next');
         }, ROTATION_INTERVAL_MS);
     }
-
     return () => clearInterval(intervalId);
-  }, [isRotating, selectedOption, currentSetKey, currentImageArray, currentImageIndex]); 
+  }, [isRotating, currentImageArray, currentImageIndex, imageUrl]); 
+
+  // --- RENDER ---
+  const getAnimationClass = (isCurrent) => {
+      if (!isTransitioning) return "";
+      if (isCurrent) {
+          return slideDirection === 'next' ? 'slide-in-next' : 'slide-in-prev';
+      } else {
+          return slideDirection === 'next' ? 'slide-out-next' : 'slide-out-prev';
+      }
+  };
 
   return (
-    <div className="bg-black min-h-screen w-screen p-0 m-0 overflow-hidden flex items-center justify-center">
+    <div className="bg-black min-h-screen w-screen p-0 m-0 overflow-hidden relative flex items-center justify-center" style={{ position: 'relative' }}>
       
+      {/* Imagen Anterior (saliendo) */}
+      {prevImageUrl && (
+        <img
+          src={prevImageUrl}
+          alt="Anterior"
+          className={`img-transition ${getAnimationClass(false)}`}
+          onError={(e) => e.target.style.display = 'none'}
+        />
+      )}
+      
+      {/* Imagen Actual (entrando o estática) */}
       <img
         key={imageKey} 
         src={imageUrl}
         alt={`Opción ${selectedOption} - ${currentSetKey}`}
-        className="max-w-full max-h-full object-cover fade-in" 
+        className={`img-transition ${getAnimationClass(true)}`} 
         onError={() => {          
           console.error(`Error cargando imagen: ${imageUrl}`);
           setImageUrl(`https://placehold.co/1920x1080/FF0000/ffffff?text=Error+${selectedOption}+${currentSetKey}`);

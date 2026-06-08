@@ -45,14 +45,51 @@ body {
 
 
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+/* Animaciones de Slide */
+
+/* Animaciones de Slide Vertical */
+
+@keyframes slideInTop {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
 }
 
+@keyframes slideOutBottom {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
 
+@keyframes slideInBottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
 
-.fade-in {
-    /* Aplica la animación 'fadeIn' durante 0.8 segundos */
-    animation: fadeIn 0.8s ease-in-out;
+@keyframes slideOutTop {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+
+.img-transition {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide-in-next {
+  animation: slideInTop 0.8s ease-in-out forwards;
+}
+
+.slide-out-next {
+  animation: slideOutBottom 0.8s ease-in-out forwards;
+}
+
+.slide-in-prev {
+  animation: slideInBottom 0.8s ease-in-out forwards;
+}
+
+.slide-out-prev {
+  animation: slideOutTop 0.8s ease-in-out forwards;
 }
