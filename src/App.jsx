@@ -70,6 +70,9 @@ function App() {
   const [slideDirection, setSlideDirection] = useState('next');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [imageKey, setImageKey] = useState(Date.now());
+  
+  // Nuevo Estado: Forzar actualización de caché
+  const [globalCacheBuster, setGlobalCacheBuster] = useState("");
 
   // --- UTILIDAD: Función central para cambiar de imagen ---
   const changeImage = (newIndex, direction, newImageArray = currentImageArray) => {
@@ -113,17 +116,25 @@ function App() {
 
     allUrls.forEach(url => {
       const img = new Image();
-      img.src = url;
+      img.src = url + globalCacheBuster;
       img.onerror = () => console.error(`Error precargando: ${url}`);
     });
     
     console.log(`Precargando ${allUrls.length} imágenes en caché.`);
-  }, []);
+  }, [globalCacheBuster]);
 
   // --- EFECTO 2: CONTROL DE TECLADO ---
   useEffect(() => {
     const handleKeyPress = (event) => {
         const key = event.key;
+
+        // 0. Forzar actualización de caché (Cache Busting)
+        if (key === '0' || key.toLowerCase() === 'r') {
+            const newBuster = `?t=${Date.now()}`;
+            setGlobalCacheBuster(newBuster);
+            console.log("🔄 Forzando actualización de caché de imágenes...");
+            return;
+        }
 
         // 1. Selección de Opción Principal (Teclas 1, 2, 3)
         if (['1', '2', '3'].includes(key)) {
@@ -207,7 +218,7 @@ function App() {
       {/* Imagen Anterior (saliendo) */}
       {prevImageUrl && (
         <img
-          src={prevImageUrl}
+          src={prevImageUrl + globalCacheBuster}
           alt="Anterior"
           className={`img-transition ${getAnimationClass(false)}`}
           onError={(e) => e.target.style.display = 'none'}
@@ -217,7 +228,7 @@ function App() {
       {/* Imagen Actual (entrando o estática) */}
       <img
         key={imageKey} 
-        src={imageUrl}
+        src={imageUrl + globalCacheBuster}
         alt={`Opción ${selectedOption} - ${currentSetKey}`}
         className={`img-transition ${getAnimationClass(true)}`} 
         onError={() => {          
